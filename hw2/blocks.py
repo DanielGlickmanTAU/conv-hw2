@@ -126,8 +126,6 @@ class Linear(Block):
         dx = dout @ d_out_dx
         #   - dw, the gradient of the loss with respect to w
         d_out_dw = x
-        # todo here???
-        # todo here mean???
         dw = x.T @ dout
         self.dw += dw
 
