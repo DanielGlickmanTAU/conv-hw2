@@ -161,9 +161,11 @@ class ReLU(Block):
 
         # TODO: Implement the ReLU operation.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
-        # ========================
 
+        out = x.clone()
+        out[out < 0] = 0
+
+        # ========================
         self.grad_cache['x'] = x
         return out
 
@@ -176,7 +178,9 @@ class ReLU(Block):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        d_out_dx = dout.masked_fill(x < 0, 0)
+        dx = d_out_dx
+
         # ========================
 
         return dx
@@ -207,7 +211,9 @@ class Sigmoid(Block):
         # TODO: Implement the Sigmoid function. Save whatever you need into
         # grad_cache.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = 1. / (1 + torch.exp(-x))
+        self.grad_cache['out'] = out
+
         # ========================
 
         return out
@@ -220,7 +226,9 @@ class Sigmoid(Block):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = self.grad_cache['out']
+        dx = dout * out * (1 - out)
+
         # ========================
 
         return dx
