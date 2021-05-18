@@ -69,4 +69,31 @@ def test_cross_entropy():
 # linear()
 # test_relu()
 # test_sigmoid()
-test_cross_entropy()
+# test_cross_entropy()
+
+
+# Test Sequential
+# Let's create a long sequence of blocks and see
+# whether we can compute end-to-end gradients of the whole thing.
+
+seq = blocks.Sequential(
+    blocks.Linear(in_features, 100),
+    blocks.Linear(100, 200),
+    blocks.Linear(200, 100),
+    blocks.ReLU(),
+    blocks.Linear(100, 500),
+    blocks.Linear(500, 200),
+    blocks.ReLU(),
+    blocks.Linear(200, 500),
+    blocks.ReLU(),
+    blocks.Linear(500, 1),
+    blocks.Sigmoid(),
+)
+x_test = torch.randn(N, in_features)
+
+# Test forward pass
+z = seq(x_test)
+test.assertSequenceEqual(z.shape, [N, 1])
+
+# Test backward pass
+test_block_grad(seq, x_test)
