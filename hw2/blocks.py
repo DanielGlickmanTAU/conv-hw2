@@ -293,7 +293,16 @@ class CrossEntropyLoss(Block):
 
         # TODO: Calculate the gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        # softmax = torch.exp(x) / torch.exp(x).sum(dim=1, keepdim=True)
+        softmax = x.softmax(dim=1)
+        softmax[torch.arange(N), y] -= 1
+
+        softmax = softmax / N
+
+        assert dout == 1.
+        assert softmax.shape == x.shape
+        # dx.shape should be (100,10)
+        dx = softmax
         # ========================
 
         return dx
