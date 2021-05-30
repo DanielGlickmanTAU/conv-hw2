@@ -1,6 +1,7 @@
 import abc
 import os
 import sys
+from torch._C import LongStorageBase
 import tqdm
 import torch
 
@@ -71,8 +72,23 @@ class Trainer(abc.ABC):
             #   save the model to a file.
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
-            # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            train_losses, train_accuracy = self.train_epoch(dl_train, verbose=verbose)
+            test_losses, test_accuracy = self.test_epoch(dl_test, verbose=verbose)
+            if not best_acc:
+                best_acc = test_accuracy
+            if test_accuracy > best_acc:
+                if checkpoints:
+                    torch.save(self.model.params(), checkpoints)
+                best_acc = test_accuracy
+            else:
+                epochs_without_improvement += 1
+                if epochs_without_improvement > early_stopping:
+                    break
+            train_loss.append(train_losses)
+            train_acc.append(train_accuracy)
+            test_loss.append(test_losses)
+            test_acc.append(test_accuracy)
+            actual_num_epochs += 1
             # ========================
 
         return FitResult(actual_num_epochs,
@@ -187,8 +203,14 @@ class BlocksTrainer(Trainer):
         # - Backward pass
         # - Optimize params
         # - Calculate number of correct predictions
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.model.train(True)
+        pred = self.model(x)
+        self.optimizer.zero_grad()
+        loss = self.loss_fn(pred, y)
+        self.loss_fn.backword()
+        self.optimizer.step()
+        num_correct = (pred - y).count_nonzero().item()
+
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -199,8 +221,10 @@ class BlocksTrainer(Trainer):
         # TODO: Evaluate the Block model on one batch of data.
         # - Forward pass
         # - Calculate number of correct predictions
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.model.train(False)
+        pred = self.model(x)
+        loss = self.loss_fn(pred, y)
+        num_correct = (pred - y).count_nonzero().item()
         # ========================
 
         return BatchResult(loss, num_correct)

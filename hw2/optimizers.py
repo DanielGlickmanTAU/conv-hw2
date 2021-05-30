@@ -70,8 +70,8 @@ class VanillaSGD(Optimizer):
             # TODO: Implement the optimizer step.
             # Update the gradient according to regularization and then
             # update the parameters tensor.
-            # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            dp.add_(self.reg * p)
+            p.sub_(self.learn_rate * dp)
             # ========================
 
 
@@ -89,8 +89,9 @@ class MomentumSGD(Optimizer):
         self.momentum = momentum
 
         # TODO: Add your own initializations as needed.
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.vt = {}
+        for p, dp in self.params:
+            self.vt[p] = torch.zeros_like(p)
         # ========================
 
     def step(self):
@@ -101,8 +102,10 @@ class MomentumSGD(Optimizer):
             # TODO: Implement the optimizer step.
             # update the parameters tensor based on the velocity. Don't forget
             # to include the regularization term.
-            # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            dp.add_(self.reg * p)
+            self.vt[p].mul_(self.momentum)
+            self.vt[p].sub_(self.learn_rate * dp)
+            p.add_(self.vt[p])
             # ========================
 
 
@@ -122,8 +125,9 @@ class RMSProp(Optimizer):
         self.eps = eps
 
         # TODO: Add your own initializations as needed.
-        # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.rt = {}
+        for p, dp in self.params:
+            self.rt[p] = torch.zeros_like(p)
         # ========================
 
     def step(self):
@@ -135,6 +139,9 @@ class RMSProp(Optimizer):
             # Create a per-parameter learning rate based on a decaying moving
             # average of it's previous gradients. Use it to update the
             # parameters tensor.
-            # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            dp.add_(self.reg * p)
+            self.rt[p].mul_(self.decay)
+            self.rt[p].add_((1 - self.decay) * dp * dp)
+            param_update = self.learn_rate / (self.rt[p].sqrt() + self.eps) * dp
+            p.sub_(param_update)
             # ========================
