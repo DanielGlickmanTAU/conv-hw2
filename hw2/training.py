@@ -204,10 +204,10 @@ class BlocksTrainer(Trainer):
         # - Optimize params
         # - Calculate number of correct predictions
         self.model.train(True)
-        pred = self.model(x)
+        pred = self.model(X)
         self.optimizer.zero_grad()
         loss = self.loss_fn(pred, y)
-        self.loss_fn.backword()
+        self.loss_fn.backward()
         self.optimizer.step()
         num_correct = (pred - y).count_nonzero().item()
 
