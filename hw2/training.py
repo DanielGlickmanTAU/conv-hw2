@@ -82,7 +82,7 @@ class Trainer(abc.ABC):
                 best_acc = test_accuracy
             else:
                 epochs_without_improvement += 1
-                if epochs_without_improvement > early_stopping:
+                if early_stopping and epochs_without_improvement > early_stopping:
                     break
             train_loss.append(train_losses)
             train_acc.append(train_accuracy)
@@ -203,13 +203,18 @@ class BlocksTrainer(Trainer):
         # - Backward pass
         # - Optimize params
         # - Calculate number of correct predictions
-        self.model.train(True)
-        pred = self.model(X)
+        # self.model.train(True)
+        logits = self.model(X)
         self.optimizer.zero_grad()
-        loss = self.loss_fn(pred, y)
-        self.loss_fn.backward()
+        loss = self.loss_fn(logits, y)
+        #todo check if should be loss.backward
+        back_loss = self.loss_fn.backward()
+        self.model.backward(back_loss)
+        # loss.backward()
         self.optimizer.step()
-        num_correct = (pred - y).count_nonzero().item()
+        pred = logits.argmax(dim=1)
+
+        num_correct = (pred == y).sum().item()
 
         # ========================
 
@@ -221,10 +226,11 @@ class BlocksTrainer(Trainer):
         # TODO: Evaluate the Block model on one batch of data.
         # - Forward pass
         # - Calculate number of correct predictions
-        self.model.train(False)
-        pred = self.model(x)
-        loss = self.loss_fn(pred, y)
-        num_correct = (pred - y).count_nonzero().item()
+        # self.model.train(False)
+        logits = self.model(X)
+        loss = self.loss_fn(logits, y)
+        pred = logits.argmax(dim=1)
+        num_correct = (pred == y).sum().item()
         # ========================
 
         return BatchResult(loss, num_correct)

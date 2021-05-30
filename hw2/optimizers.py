@@ -7,6 +7,7 @@ class Optimizer(abc.ABC):
     """
     Base class for optimizers.
     """
+
     def __init__(self, params):
         """
         :param params: A sequence of model parameters to optimize. Can be a
@@ -71,7 +72,10 @@ class VanillaSGD(Optimizer):
             # Update the gradient according to regularization and then
             # update the parameters tensor.
             dp.add_(self.reg * p)
-            p = p.sub(self.learn_rate * dp)
+            # p = p.sub(self.learn_rate * dp)
+            # p = p - self.learn_rate * dp
+            p.data.sub_(self.learn_rate * dp)
+
             # ========================
 
 
