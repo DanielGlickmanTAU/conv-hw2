@@ -19,6 +19,7 @@ class Trainer(abc.ABC):
     - Single epoch (train_epoch/test_epoch)
     - Single batch (train_batch/test_batch)
     """
+
     def __init__(self, model, loss_fn, optimizer, device=None):
         """
         Initialize the trainer.
@@ -61,9 +62,9 @@ class Trainer(abc.ABC):
 
         for epoch in range(num_epochs):
             verbose = False  # pass this to train/test_epoch.
-            if epoch % print_every == 0 or epoch == num_epochs-1:
+            if epoch % print_every == 0 or epoch == num_epochs - 1:
                 verbose = True
-            self._print(f'--- EPOCH {epoch+1}/{num_epochs} ---', verbose)
+            self._print(f'--- EPOCH {epoch + 1}/{num_epochs} ---', verbose)
 
             # TODO: Train & evaluate for one epoch
             # - Use the train/test_epoch methods.
@@ -74,6 +75,15 @@ class Trainer(abc.ABC):
             #   simple regularization technique that is highly recommended.
             train_losses, train_accuracy = self.train_epoch(dl_train, verbose=verbose)
             test_losses, test_accuracy = self.test_epoch(dl_test, verbose=verbose)
+            # test_losses, test_accuracy = self.train_epoch(dl_test, verbose=verbose)
+
+            # print(train_losses)
+            # print(test_losses)
+
+            # train_loss = [x.detach().numpy() for x in train_loss]
+            train_losses = [x.item() for x in train_losses]
+            test_losses = [x.item() for x in test_losses]
+
             if not best_acc:
                 best_acc = test_accuracy
             if test_accuracy > best_acc:
@@ -84,13 +94,19 @@ class Trainer(abc.ABC):
                 epochs_without_improvement += 1
                 if early_stopping and epochs_without_improvement > early_stopping:
                     break
-            train_loss.append(train_losses)
+            # train_loss.append(train_losses)
+            # train_acc.append(train_accuracy)
+            # test_loss.append(test_losses)
+            # test_acc.append(test_accuracy)
+
+            train_loss.extend(train_losses)
             train_acc.append(train_accuracy)
-            test_loss.append(test_losses)
+            test_loss.extend(test_losses)
             test_acc.append(test_accuracy)
             actual_num_epochs += 1
             # ========================
 
+        print('train_loss', train_loss)
         return FitResult(actual_num_epochs,
                          train_loss, train_acc, test_loss, test_acc)
 
@@ -101,7 +117,7 @@ class Trainer(abc.ABC):
         :param kw: Keyword args supported by _foreach_batch.
         :return: An EpochResult for the epoch.
         """
-        self.model.train(True)  # set train mode
+        # self.model.train(True)  # set train mode
         return self._foreach_batch(dl_train, self.train_batch, **kw)
 
     def test_epoch(self, dl_test: DataLoader, **kw) -> EpochResult:
@@ -207,7 +223,7 @@ class BlocksTrainer(Trainer):
         logits = self.model(X)
         self.optimizer.zero_grad()
         loss = self.loss_fn(logits, y)
-        #todo check if should be loss.backward
+        # todo check if should be loss.backward
         back_loss = self.loss_fn.backward()
         self.model.backward(back_loss)
         # loss.backward()
