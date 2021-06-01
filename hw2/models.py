@@ -38,11 +38,16 @@ class MLP(Block):
         for f_in, f_out in zip(features[:-1], features[1:]):
             blocks.append(Linear(in_features=f_in, out_features=f_out))
             blocks.append(ReLU() if activation == 'relu' else Sigmoid())
+            if dropout:
+                blocks.append(Dropout(dropout))
 
         # remove last activation
         blocks = blocks[:-1]
+        #remove dropout
+        if dropout:
+            blocks = blocks[:-1]
         # ========================
-
+        print(blocks)
         self.sequence = Sequential(*blocks)
 
     def forward(self, x, **kw):

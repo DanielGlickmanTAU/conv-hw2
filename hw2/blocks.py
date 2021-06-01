@@ -327,12 +327,13 @@ class Dropout(Block):
         # current mode (train/test).
         out = None
         if self.training_mode:
-            probs = torch.full(*x.shape, 1 - self.p)
+            probs = torch.full(x.shape, 1 - self.p)
             mask = torch.bernoulli(probs) / (1 - self.p)
             out = x * mask
             self.grad_cache['mask'] = mask
         else:
-            out = x
+            out = x * (1 - self.p)
+            self.grad_cache['mask'] = torch.ones_like(x)
         # ========================
 
         return out
@@ -340,6 +341,11 @@ class Dropout(Block):
     def backward(self, dout):
         # TODO: Implement the dropout backward pass.
         dx = dout * self.grad_cache['mask']
+        # if self.training_mode:
+        #     dx *= 1 / (1 - self.p)
+        if not self.training_mode:
+            dx *= (1 - self.p)
+
         # ========================
 
         return dx
@@ -368,7 +374,7 @@ class Sequential(Block):
         # ====== YOUR CODE: ======
         out = x
         for block in self.blocks:
-            out = block(out,**kw)
+            out = block(out, **kw)
             # ========================
 
         return out
