@@ -90,6 +90,7 @@ class Trainer(abc.ABC):
                 if checkpoints:
                     torch.save(self.model.params(), checkpoints)
                 best_acc = test_accuracy
+                epochs_without_improvement = 0
             else:
                 epochs_without_improvement += 1
                 if early_stopping and epochs_without_improvement > early_stopping:
@@ -106,7 +107,7 @@ class Trainer(abc.ABC):
             actual_num_epochs += 1
             # ========================
 
-        print('train_loss', train_loss)
+        # print('train_loss', train_loss)
         return FitResult(actual_num_epochs,
                          train_loss, train_acc, test_loss, test_acc)
 

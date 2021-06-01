@@ -72,8 +72,6 @@ class VanillaSGD(Optimizer):
             # Update the gradient according to regularization and then
             # update the parameters tensor.
             dp.add_(self.reg * p)
-            # p = p.sub(self.learn_rate * dp)
-            # p = p - self.learn_rate * dp
             p.data.sub_(self.learn_rate * dp)
 
             # ========================
@@ -109,7 +107,7 @@ class MomentumSGD(Optimizer):
             dp.add_(self.reg * p)
             self.vt[p].mul_(self.momentum)
             self.vt[p].sub_(self.learn_rate * dp)
-            p.add_(self.vt[p])
+            p.data.add_(self.vt[p])
             # ========================
 
 
@@ -145,7 +143,7 @@ class RMSProp(Optimizer):
             # parameters tensor.
             dp.add_(self.reg * p)
             self.rt[p].mul_(self.decay)
-            self.rt[p].add_((1 - self.decay) * dp * dp)
-            param_update = self.learn_rate / (self.rt[p].sqrt() + self.eps) * dp
-            p.sub_(param_update)
+            self.rt[p].add_((1 - self.decay) * torch.pow(dp, 2))
+            param_update = (self.learn_rate / (self.rt[p].sqrt() + self.eps)) * dp
+            p.data.sub_(param_update)
             # ========================
