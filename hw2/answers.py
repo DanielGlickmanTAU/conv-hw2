@@ -49,26 +49,24 @@ def part2_dropout_hp():
 part2_q1 = r"""
 **Your answer:**
 
+1)The graphs matches what we expected. The purpose of dropout is to prevent overfitting. 
+We can see that with no drop out, accuracy on the training set is higher, but drops significantly on the validation set,
+while with dropout, the accuracy is much closer between validation and train set.
 
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+2)
+ The accuracy of high dropout is lower on the train set, but the difference between train and validation accuracy is very small.
+ While lower dropout achives higher accuracy on the train set, but suffers a drop in accuracy on the validation set.
+ This is due to less overfitting when using a higher dropout.
+ Finally, we can see both dropouts achieve about the same accuracy on the validation set, and outperform no dropout.    
 
 """
 
 part2_q2 = r"""
 **Your answer:**
 
-
-Write your answer using **markdown** and $\LaTeX$:
-```python
-# A code block
-a = 2
-```
-An equation: $e^{i\pi} -1 = 0$
+Yes, it is possible. It could be for example, that the classification of only one example would change from false to true,
+to the accuracy will increase. But the predictions of many, already missclassified examples, would get worse, which will also increase the loss.
+ 
 
 """
 # ==============
